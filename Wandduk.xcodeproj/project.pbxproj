@@ -1,0 +1,374 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		08DCEFB451F908AC32999D78 /* WanddukApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EA2768C2FA6DEC12CBD141C /* WanddukApp.swift */; };
+		1164CCC2AD853DDEA9827AFD /* TasteSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2845578937445B0EAC6E7B0 /* TasteSlider.swift */; };
+		48BF3ADC7F81774989549822 /* PhotoCaptureProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C279A0D8F805581DD4D6B5B /* PhotoCaptureProtocol.swift */; };
+		4C61AAEDABE84A5F0549099C /* MockPhotoCaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78778BA9A6F3887F6D6EF06F /* MockPhotoCaptureService.swift */; };
+		589143BDD3D3059EE2C189ED /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DD920A1AD411EE20B8141651 /* Assets.xcassets */; };
+		61D81C021FE18E040CD11A11 /* CaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F31EC7A92298C70E9FA3239A /* CaptureView.swift */; };
+		A27878E12F5E95C44D78D0A0 /* TasteDimension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8371B4DC5DA508ECCD8D8EEE /* TasteDimension.swift */; };
+		AA4E7BD01032CD45119FA855 /* RecordFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C214F300710339D06CCE2831 /* RecordFormView.swift */; };
+		C3FD03F34ED2D0F26AEC1C44 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD15D537862A21D571486BE /* ContentView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1C279A0D8F805581DD4D6B5B /* PhotoCaptureProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureProtocol.swift; sourceTree = "<group>"; };
+		3D31F01AEF6D61DC70BA77C4 /* Wandduk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Wandduk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		78778BA9A6F3887F6D6EF06F /* MockPhotoCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPhotoCaptureService.swift; sourceTree = "<group>"; };
+		7EA2768C2FA6DEC12CBD141C /* WanddukApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WanddukApp.swift; sourceTree = "<group>"; };
+		8371B4DC5DA508ECCD8D8EEE /* TasteDimension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasteDimension.swift; sourceTree = "<group>"; };
+		C214F300710339D06CCE2831 /* RecordFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordFormView.swift; sourceTree = "<group>"; };
+		DD920A1AD411EE20B8141651 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E2845578937445B0EAC6E7B0 /* TasteSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasteSlider.swift; sourceTree = "<group>"; };
+		F31EC7A92298C70E9FA3239A /* CaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureView.swift; sourceTree = "<group>"; };
+		FDD15D537862A21D571486BE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		21BDD0FF9F370022E267AEA0 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				78778BA9A6F3887F6D6EF06F /* MockPhotoCaptureService.swift */,
+				1C279A0D8F805581DD4D6B5B /* PhotoCaptureProtocol.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		3FA94A70C1A9C72EA005603E /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				8371B4DC5DA508ECCD8D8EEE /* TasteDimension.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		4ECBC103BD9BAFFF9CF4F0E2 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				E2845578937445B0EAC6E7B0 /* TasteSlider.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		5F4BB57DCEF2780FFAD3B0B1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3D31F01AEF6D61DC70BA77C4 /* Wandduk.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8AD021620A2014557AE748A6 = {
+			isa = PBXGroup;
+			children = (
+				E9492A1AF98B0E8A42D93371 /* Wandduk */,
+				5F4BB57DCEF2780FFAD3B0B1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		9232B45156443BE251347091 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				F31EC7A92298C70E9FA3239A /* CaptureView.swift */,
+				C214F300710339D06CCE2831 /* RecordFormView.swift */,
+				4ECBC103BD9BAFFF9CF4F0E2 /* Components */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		E9492A1AF98B0E8A42D93371 /* Wandduk */ = {
+			isa = PBXGroup;
+			children = (
+				DD920A1AD411EE20B8141651 /* Assets.xcassets */,
+				FDD15D537862A21D571486BE /* ContentView.swift */,
+				7EA2768C2FA6DEC12CBD141C /* WanddukApp.swift */,
+				3FA94A70C1A9C72EA005603E /* Models */,
+				21BDD0FF9F370022E267AEA0 /* Services */,
+				9232B45156443BE251347091 /* Views */,
+			);
+			path = Wandduk;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F7FC7C3B8036109D493EB2F3 /* Wandduk */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 49F391686945BBF636F40422 /* Build configuration list for PBXNativeTarget "Wandduk" */;
+			buildPhases = (
+				50B7FAC7CA2CD87B548413F1 /* Sources */,
+				69A18F5EC15760EB8437BC3C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Wandduk;
+			packageProductDependencies = (
+			);
+			productName = Wandduk;
+			productReference = 3D31F01AEF6D61DC70BA77C4 /* Wandduk.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DB7265C7DF5C63E055BA022E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					F7FC7C3B8036109D493EB2F3 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = B1DEA2265A218761607377CB /* Build configuration list for PBXProject "Wandduk" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 8AD021620A2014557AE748A6;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F7FC7C3B8036109D493EB2F3 /* Wandduk */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		69A18F5EC15760EB8437BC3C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				589143BDD3D3059EE2C189ED /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		50B7FAC7CA2CD87B548413F1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				61D81C021FE18E040CD11A11 /* CaptureView.swift in Sources */,
+				C3FD03F34ED2D0F26AEC1C44 /* ContentView.swift in Sources */,
+				4C61AAEDABE84A5F0549099C /* MockPhotoCaptureService.swift in Sources */,
+				48BF3ADC7F81774989549822 /* PhotoCaptureProtocol.swift in Sources */,
+				AA4E7BD01032CD45119FA855 /* RecordFormView.swift in Sources */,
+				A27878E12F5E95C44D78D0A0 /* TasteDimension.swift in Sources */,
+				1164CCC2AD853DDEA9827AFD /* TasteSlider.swift in Sources */,
+				08DCEFB451F908AC32999D78 /* WanddukApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		3D5EFDAEE8B4287FBB0AD481 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_KEY_NSCameraUsageDescription = "맛있는 음식 사진을 기록하기 위해 카메라 접근이 필요합니다.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "음식 사진을 저장하기 위해 사진 라이브러리 접근이 필요합니다.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.raqoon886.wandduk;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		4848BAD3D1A3BDFA5011B42B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		497C06D346635D094E0635F2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		B2304FBF74C3223E6FFCF461 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_KEY_NSCameraUsageDescription = "맛있는 음식 사진을 기록하기 위해 카메라 접근이 필요합니다.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "음식 사진을 저장하기 위해 사진 라이브러리 접근이 필요합니다.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.raqoon886.wandduk;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		49F391686945BBF636F40422 /* Build configuration list for PBXNativeTarget "Wandduk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B2304FBF74C3223E6FFCF461 /* Debug */,
+				3D5EFDAEE8B4287FBB0AD481 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B1DEA2265A218761607377CB /* Build configuration list for PBXProject "Wandduk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4848BAD3D1A3BDFA5011B42B /* Debug */,
+				497C06D346635D094E0635F2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DB7265C7DF5C63E055BA022E /* Project object */;
+}
