@@ -4,8 +4,20 @@ import SwiftUI
 struct CaptureView: View {
     @Environment(\.dismiss) private var dismiss
     
-    /// 촬영 서비스 (Mock 또는 Real)
-    private let captureService: PhotoCaptureProtocol
+    /// 루트(아카이브)로 돌아가기 위한 바인딩
+    @Binding var dismissToRoot: Bool
+    
+    /// 시뮬레이터 여부
+    private var isSimulator: Bool {
+        #if targetEnvironment(simulator)
+        return true
+        #else
+        return false
+        #endif
+    }
+    
+    /// Mock 촬영 서비스 (시뮬레이터용)
+    private let mockService = MockPhotoCaptureService()
     
     /// 현재 촬영 단계
     @State private var currentStep: CaptureType = .before
@@ -14,15 +26,14 @@ struct CaptureView: View {
     @State private var beforeImage: UIImage?
     @State private var afterImage: UIImage?
     
-    /// 촬영 중 로딩 상태
+    /// 촬영 중 로딩 상태 (시뮬레이터 Mock용)
     @State private var isCapturing = false
+    
+    /// 카메라 시트 표시 (실기기용)
+    @State private var showCamera = false
     
     /// 기록지 화면으로 이동
     @State private var showRecordForm = false
-    
-    init(captureService: PhotoCaptureProtocol = MockPhotoCaptureService()) {
-        self.captureService = captureService
-    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -52,9 +63,22 @@ struct CaptureView: View {
                 }
             }
         }
+        .sheet(isPresented: $showCamera) {
+            CameraPickerView { image in
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    if currentStep == .before {
+                        beforeImage = image
+                    } else {
+                        afterImage = image
+                    }
+                }
+            }
+        }
         .navigationDestination(isPresented: $showRecordForm) {
             if let before = beforeImage, let after = afterImage {
-                RecordFormView(beforeImage: before, afterImage: after)
+                RecordFormView(beforeImage: before, afterImage: after) {
+                    dismissToRoot = false
+                }
             }
         }
     }
@@ -114,7 +138,7 @@ struct CaptureView: View {
                     }
                 }
                 
-                // 로딩 오버레이
+                // 로딩 오버레이 (시뮬레이터 Mock 촬영 시)
                 if isCapturing {
                     RoundedRectangle(cornerRadius: 24)
                         .fill(.ultraThinMaterial)
@@ -134,9 +158,7 @@ struct CaptureView: View {
         VStack(spacing: 16) {
             // 촬영 버튼
             Button {
-                Task {
-                    await capturePhoto()
-                }
+                capturePhoto()
             } label: {
                 ZStack {
                     Circle()
@@ -173,21 +195,25 @@ struct CaptureView: View {
     
     // MARK: - Actions
     
-    private func capturePhoto() async {
-        isCapturing = true
-        
-        let image = await captureService.capturePhoto(type: currentStep)
-        
-        await MainActor.run {
-            isCapturing = false
-            
-            withAnimation(.easeInOut(duration: 0.3)) {
-                if currentStep == .before {
-                    beforeImage = image
-                } else {
-                    afterImage = image
+    /// 시뮬레이터: Mock 서비스로 즉시 촬영, 실기기: 카메라 시트 표시
+    private func capturePhoto() {
+        if isSimulator {
+            Task {
+                isCapturing = true
+                let image = await mockService.capturePhoto(type: currentStep)
+                await MainActor.run {
+                    isCapturing = false
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        if currentStep == .before {
+                            beforeImage = image
+                        } else {
+                            afterImage = image
+                        }
+                    }
                 }
             }
+        } else {
+            showCamera = true
         }
     }
     
@@ -205,6 +231,6 @@ struct CaptureView: View {
 
 #Preview {
     NavigationStack {
-        CaptureView()
+        CaptureView(dismissToRoot: .constant(true))
     }
 }
