@@ -1,11 +1,21 @@
 import SwiftUI
 import SwiftData
 
+/// 뷰 모드
+enum ArchiveViewMode {
+    case grid
+    case calendar
+}
+
 struct ContentView: View {
     @Query(sort: \MealRecord.createdAt, order: .reverse)
     private var records: [MealRecord]
     
     @State private var showCapture = false
+    @State private var viewMode: ArchiveViewMode = .grid
+    @State private var selectedDate: Date = Date()
+    
+    private let calendar = Calendar.current
     
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -18,13 +28,33 @@ struct ContentView: View {
                 if records.isEmpty {
                     emptyStateView
                 } else {
-                    archiveGridView
+                    switch viewMode {
+                    case .grid:
+                        archiveGridView
+                    case .calendar:
+                        calendarArchiveView
+                    }
                 }
                 
                 // FAB — 새 기록 시작
                 fabButton
             }
             .navigationTitle("완뚝")
+            .toolbar {
+                // 뷰 모드 토글 (기록이 있을 때만 표시)
+                if !records.isEmpty {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                viewMode = viewMode == .grid ? .calendar : .grid
+                            }
+                        } label: {
+                            Image(systemName: viewMode == .grid ? "calendar" : "square.grid.2x2")
+                                .font(.body)
+                        }
+                    }
+                }
+            }
             .navigationDestination(isPresented: $showCapture) {
                 CaptureView(dismissToRoot: $showCapture)
             }
@@ -90,7 +120,30 @@ struct ContentView: View {
                 }
             }
             .padding(.horizontal)
-            .padding(.bottom, 100) // FAB과 겹치지 않도록
+            .padding(.bottom, 100)
+        }
+    }
+    
+    private var calendarArchiveView: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                // 캘린더
+                CalendarView(
+                    recordCounts: recordCountsByDate,
+                    selectedDate: $selectedDate
+                )
+                
+                Divider()
+                    .padding(.horizontal)
+                
+                // 선택된 날짜의 기록 리스트
+                DailyRecordListView(
+                    records: records,
+                    selectedDate: selectedDate
+                )
+                .padding(.bottom, 100)
+            }
+            .padding(.top, 8)
         }
     }
     
@@ -108,6 +161,18 @@ struct ContentView: View {
         }
         .padding(.trailing, 20)
         .padding(.bottom, 24)
+    }
+    
+    // MARK: - Helpers
+    
+    /// 날짜별 기록 수를 계산
+    private var recordCountsByDate: [DateComponents: Int] {
+        var counts: [DateComponents: Int] = [:]
+        for record in records {
+            let components = calendar.dateComponents([.year, .month, .day], from: record.createdAt)
+            counts[components, default: 0] += 1
+        }
+        return counts
     }
 }
 
