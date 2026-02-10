@@ -224,28 +224,64 @@ struct RecordFormView: View {
                     .offset(y: isPressingComplete ? 2 : 10)
                 
                 // 2. 버튼 몸체 (주물 솥뚜껑 재질)
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [Color.charcoalBlack.opacity(0.9), Color.black],
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: 40
+                ZStack {
+                    // 기본 검은 쇠 느낌
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [Color.charcoalBlack.opacity(0.8), Color.black],
+                                center: .center,
+                                startRadius: 0,
+                                endRadius: 40
+                            )
                         )
-                    )
-                    .frame(width: 80, height: 80)
-                    .overlay(
+                    
+                    // 솥뚜껑 동심원 무늬 (양각 효과)
+                    ForEach(1..<4) { i in
                         Circle()
-                            .stroke(Color.lavaOrange.opacity(0.3), lineWidth: 1)
-                    )
+                            .stroke(
+                                LinearGradient(
+                                    colors: [.white.opacity(0.1), .black.opacity(0.8)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: CGFloat(i) * 2
+                            )
+                            .frame(width: 80 - CGFloat(i * 18))
+                    }
+                    
+                    // 솥뚜껑 손잡이 (중앙)
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.charcoalBlack, Color.black],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 24, height: 24)
+                        .shadow(color: .black.opacity(0.8), radius: 2, x: 2, y: 2)
+                        .overlay(
+                             Circle()
+                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        )
+                }
+                .frame(width: 80, height: 80)
                 
-                // 3. 텍스트 (불도장)
-                Text("완뚝")
-                    .font(.title2)
-                    .fontWeight(.black)
-                    .fontDesign(.serif)
-                    .foregroundStyle(Color.lavaOrange)
-                    .shadow(color: .lavaOrange, radius: isPressingComplete ? 10 : 2) // 누르면 빛남
+                // 3. 텍스트 (빨간색 '完' 한자 도장)
+                Text("完")
+                    .font(.system(size: 32, weight: .heavy, design: .serif)) // 한자는 system font가 안전
+                    .foregroundStyle(Color.kimchiRed)
+                    .shadow(color: .kimchiRed.opacity(0.5), radius: isPressingComplete ? 8 : 2)
+                    .overlay(
+                        // 도장 테두리
+                        RoundedRectangle(cornerRadius: 4)
+                            .stroke(Color.kimchiRed, lineWidth: 2)
+                            .frame(width: 44, height: 44)
+                            .rotationEffect(.degrees(isPressingComplete ? -5 : 0))
+                            .opacity(0.8)
+                    )
+                    .rotationEffect(.degrees(-5)) // 도장은 삐딱하게
                 
                 // 4. 용암 효과 (펄펄 끓음 - 로딩 중)
                 if isSaving {
