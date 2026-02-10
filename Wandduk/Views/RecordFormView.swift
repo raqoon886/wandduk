@@ -1,7 +1,7 @@
 import SwiftUI
 import SwiftData
 
-/// 기록지 화면 - Before/After 사진과 맛 평가
+/// 기록지 화면 - "을지로 40년 전통의 주문서" 컨셉
 struct RecordFormView: View {
     let beforeImage: UIImage
     let afterImage: UIImage
@@ -29,42 +29,48 @@ struct RecordFormView: View {
     @State private var showSaveError = false
     @State private var saveErrorMessage = ""
     
+    // 애니메이션 상태
+    @State private var isPressingComplete = false // 버튼 누르는 중
+    @State private var showImpactEffect = false // 쿵! 효과
+    
     /// 저장 완료 시 루트로 돌아가기 위한 콜백
     var onSaveComplete: () -> Void = {}
     
+    // 햅틱 피드백
+    private let heavyImpact = UIImpactFeedbackGenerator(style: .heavy)
+    private let rigidImpact = UIImpactFeedbackGenerator(style: .rigid)
+    
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Before/After 사진 비교
-                photoComparisonSection
-                
-                Divider()
-                    .padding(.horizontal)
-                
-                // 카테고리 선택
-                categorySection
-                
-                Divider()
-                    .padding(.horizontal)
-                
-                // 맛 평가 섹션
-                tasteEvaluationSection
-                
-                Divider()
-                    .padding(.horizontal)
-                
-                // 메모 입력
-                memoSection
-                
-                // 저장 버튼
-                saveButton
-                    .padding(.top, 8)
-                
-                Spacer(minLength: 40)
+        ZStack {
+            // 배경
+            Color.brothBeige.ignoresSafeArea()
+            
+            ScrollView {
+                VStack(spacing: 32) {
+                    // 상단: 오늘의 한상
+                    photoComparisonSection
+                        .wabiSabi() // 살짝만 삐딱하게
+                    
+                    Divider()
+                        .background(Color.charcoalBlack.opacity(0.2))
+                        .padding(.horizontal, 24)
+                    
+                    // 주문서 (맛 평가)
+                    orderSheetSection
+                    
+                    Spacer(minLength: 60)
+                }
+                .padding(.vertical, 24)
             }
-            .padding(.top, 16)
+            
+            // 하단: 완뚝 불도장 버튼 (플로팅)
+            VStack {
+                Spacer()
+                wanttukButton
+                    .padding(.bottom, 20)
+            }
         }
-        .navigationTitle("기록하기")
+        .navigationTitle("식사 기록")
         .navigationBarTitleDisplayMode(.inline)
         .disabled(isSaving)
         .alert("저장 실패", isPresented: $showSaveError) {
@@ -72,184 +78,239 @@ struct RecordFormView: View {
         } message: {
             Text(saveErrorMessage)
         }
-    }
-    
-    // MARK: - Subviews
-    
-    private var photoComparisonSection: some View {
-        VStack(spacing: 12) {
-            Text("오늘의 한 그릇")
-                .font(.headline)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal)
-            
-            HStack(spacing: 12) {
-                // Before
-                photoCard(image: beforeImage, label: "식사 전")
-                
-                // Arrow
-                Image(systemName: "arrow.right")
-                    .font(.title2)
-                    .foregroundStyle(.orange)
-                
-                // After
-                photoCard(image: afterImage, label: "완뚝!")
+        .overlay {
+            if showImpactEffect {
+                impactVisualEffect
             }
-            .padding(.horizontal)
         }
     }
     
-    private func photoCard(image: UIImage, label: String) -> some View {
+    // MARK: - Visual Sections
+    
+    private var photoComparisonSection: some View {
+        VStack(spacing: 16) {
+            Text("오늘의 한 상")
+                .font(.headline)
+                .foregroundStyle(Color.charcoalBlack)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 24)
+            
+            HStack(spacing: 0) {
+                // Before (약간 왼쪽으로 기울임)
+                polaroidView(image: beforeImage, label: "먹기 전")
+                    .rotationEffect(.degrees(-1.5))
+                    .zIndex(1)
+                
+                // After (약간 오른쪽으로 기울이고 겹침)
+                polaroidView(image: afterImage, label: "완뚝 검증")
+                    .rotationEffect(.degrees(2.0))
+                    .offset(x: -15)
+                    .zIndex(2)
+            }
+        }
+    }
+    
+    private func polaroidView(image: UIImage, label: String) -> some View {
         VStack(spacing: 8) {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFill()
-                .frame(width: 140, height: 140)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+                .frame(width: 150, height: 150)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke(Color.charcoalBlack.opacity(0.1), lineWidth: 1)
+                )
             
             Text(label)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .fontDesign(.serif) // 명조체 느낌
+                .foregroundStyle(Color.charcoalBlack.opacity(0.8))
         }
+        .padding(10)
+        .background(Color.white)
+        .shadow(color: .black.opacity(0.15), radius: 5, x: 2, y: 3)
     }
     
-    private var categorySection: some View {
-        VStack(spacing: 12) {
-            Text("카테고리")
-                .font(.headline)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal)
+    private var orderSheetSection: some View {
+        VStack(spacing: 24) {
+            // 카테고리 선택 (도장 찍기)
+            categorySelector
             
-            HStack(spacing: 10) {
-                ForEach(MealRecord.supportedCategories, id: \.self) { category in
-                    let emoji = category == "국밥" ? "🍲" : "🍜"
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            selectedCategory = category
-                        }
-                    } label: {
-                        HStack(spacing: 6) {
-                            Text(emoji)
-                            Text(category)
-                                .fontWeight(.medium)
-                        }
-                        .font(.subheadline)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(
-                            selectedCategory == category
-                                ? Color.orange.opacity(0.15)
-                                : Color.gray.opacity(0.08)
-                        )
-                        .foregroundStyle(
-                            selectedCategory == category ? .orange : .primary
-                        )
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .stroke(
-                                    selectedCategory == category ? Color.orange : Color.clear,
-                                    lineWidth: 1.5
-                                )
-                        )
-                    }
-                    .buttonStyle(.plain)
-                }
-                
-                Spacer()
-            }
-            .padding(.horizontal)
-        }
-    }
-    
-    private var tasteEvaluationSection: some View {
-        VStack(spacing: 8) {
-            HStack {
-                Text("맛 평가")
-                    .font(.headline)
-                
-                Spacer()
-                
-                // 리셋 버튼
-                Button {
-                    withAnimation {
-                        for key in tasteValues.keys {
-                            tasteValues[key] = 4
-                        }
-                    }
-                } label: {
-                    Label("초기화", systemImage: "arrow.counterclockwise")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .padding(.horizontal)
-            
-            // 맛 슬라이더들
-            VStack(spacing: 4) {
+            // 맛 평가 슬라이더
+            VStack(spacing: 24) {
                 ForEach(TasteDimension.gukbapDimensions) { dimension in
-                    TasteSlider(
+                    ArtisanTasteSlider(
                         dimension: dimension,
                         value: binding(for: dimension.id)
                     )
-                    
-                    if dimension.id != TasteDimension.gukbapDimensions.last?.id {
-                        Divider()
-                            .padding(.vertical, 4)
-                    }
                 }
             }
-            .padding()
-            .background(Color.gray.opacity(0.05))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .padding(.horizontal)
-        }
-    }
-    
-    private var memoSection: some View {
-        VStack(spacing: 8) {
-            Text("메모 (선택)")
-                .font(.headline)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal)
+            .padding(.horizontal, 24)
             
-            TextField("오늘의 한 줄 감상을 남겨보세요", text: $memo, axis: .vertical)
-                .textFieldStyle(.plain)
-                .lineLimit(3...6)
-                .padding()
-                .background(Color.gray.opacity(0.05))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .padding(.horizontal)
+            // 메모
+            VStack(alignment: .leading, spacing: 8) {
+                Text("주방장에게 한마디 (메모)")
+                    .font(.subheadline)
+                    .fontDesign(.serif)
+                    .foregroundStyle(Color.charcoalBlack.opacity(0.7))
+                
+                TextField("", text: $memo, axis: .vertical)
+                    .lineLimit(3...5)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.charcoalBlack.opacity(0.2), lineWidth: 1)
+                            .background(Color.white.opacity(0.5))
+                    )
+                    .fontDesign(.serif)
+            }
+            .padding(.horizontal, 24)
         }
     }
     
-    private var saveButton: some View {
+    private var categorySelector: some View {
+        HStack(spacing: 20) {
+            ForEach(MealRecord.supportedCategories, id: \.self) { category in
+                let isSelected = selectedCategory == category
+                Button {
+                    rigidImpact.impactOccurred()
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        selectedCategory = category
+                    }
+                } label: {
+                    Text(category)
+                        .font(.headline)
+                        .fontDesign(.serif)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 24)
+                        .background(
+                            ZStack {
+                                if isSelected {
+                                    // 도장 찍힌 느낌의 불규칙한 테두리
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color.kimchiRed.opacity(0.1))
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.kimchiRed, lineWidth: 2)
+                                } else {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color.clear)
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.charcoalBlack.opacity(0.2), lineWidth: 1)
+                                }
+                            }
+                        )
+                        .foregroundStyle(isSelected ? Color.kimchiRed : Color.charcoalBlack.opacity(0.6))
+                        .scaleEffect(isSelected ? 1.05 : 1.0)
+                        .rotationEffect(.degrees(isSelected ? -2 : 0)) // 도장은 원래 삐딱하게 찍힘
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+    
+    // MARK: - The "Wanttuk" Button (Heavy Impact)
+    
+    private var wanttukButton: some View {
         Button {
+            handleWanttukPress()
+        } label: {
+            ZStack {
+                // 1. 그림자 (버튼이 높이 떠있음 -> 눌리면 사라짐)
+                Circle()
+                    .fill(Color.charcoalBlack.opacity(0.3))
+                    .frame(width: 80, height: 80)
+                    .blur(radius: isPressingComplete ? 2 : 10)
+                    .offset(y: isPressingComplete ? 2 : 10)
+                
+                // 2. 버튼 몸체 (주물 솥뚜껑 재질)
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [Color.charcoalBlack.opacity(0.9), Color.black],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: 40
+                        )
+                    )
+                    .frame(width: 80, height: 80)
+                    .overlay(
+                        Circle()
+                            .stroke(Color.lavaOrange.opacity(0.3), lineWidth: 1)
+                    )
+                
+                // 3. 텍스트 (불도장)
+                Text("완뚝")
+                    .font(.title2)
+                    .fontWeight(.black)
+                    .fontDesign(.serif)
+                    .foregroundStyle(Color.lavaOrange)
+                    .shadow(color: .lavaOrange, radius: isPressingComplete ? 10 : 2) // 누르면 빛남
+                
+                // 4. 용암 효과 (펄펄 끓음 - 로딩 중)
+                if isSaving {
+                    Circle()
+                        .stroke(Color.lavaOrange, lineWidth: 3)
+                        .frame(width: 88, height: 88)
+                        .scaleEffect(1.1)
+                        .opacity(0.5)
+                        .overlay {
+                            ProgressView()
+                                .tint(.lavaOrange)
+                        }
+                }
+            }
+            .scaleEffect(isPressingComplete ? 0.9 : 1.0) // 꾹 눌린 상태
+        }
+        .disabled(isSaving)
+        .pressEvents { pressing in // 커스텀 프레스 제스처 핸들러 필요 (아래 구현)
+            withAnimation(.easeInOut(duration: 0.1)) {
+                isPressingComplete = pressing
+            }
+        }
+    }
+    
+    private var impactVisualEffect: some View {
+        ZStack {
+            // 화면 전체가 쿵 울리는 효과 (플래시)
+            Color.white.opacity(0.3)
+                .ignoresSafeArea()
+            
+            // "쿵!" 텍스트
+            Text("完!")
+                .font(.system(size: 100, weight: .black, design: .serif))
+                .foregroundStyle(Color.charcoalBlack)
+                .rotationEffect(.degrees(-10))
+            
+            // 충격파 원
+            Circle()
+                .stroke(Color.charcoalBlack, lineWidth: 5)
+                .frame(width: 100, height: 100)
+                .scaleEffect(2.5)
+                .opacity(0)
+        }
+    }
+    
+    // MARK: - Logic
+    
+    private func handleWanttukPress() {
+        // 1. 시각적 피드백 (쿵!)
+        heavyImpact.impactOccurred()
+        
+        withAnimation(.easeOut(duration: 0.1)) {
+            showImpactEffect = true
+        }
+        
+        // 0.5초 뒤에 페이드아웃 및 저장 시작
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation {
+                showImpactEffect = false
+            }
             Task {
                 await saveRecord()
             }
-        } label: {
-            Group {
-                if isSaving {
-                    ProgressView()
-                        .tint(.white)
-                } else {
-                    Text("기록 완료")
-                }
-            }
-            .font(.headline)
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.orange.gradient)
-            .foregroundStyle(.white)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
         }
-        .disabled(isSaving)
-        .padding(.horizontal)
     }
-    
-    // MARK: - Helpers
     
     private func binding(for id: String) -> Binding<Int> {
         Binding(
@@ -258,17 +319,13 @@ struct RecordFormView: View {
         )
     }
     
-    // MARK: - Save Logic
-    
     private func saveRecord() async {
         isSaving = true
         
         do {
-            // 1. 이미지 파일 저장
             let beforePath = try ImageStorageService.saveImage(beforeImage)
             let afterPath = try ImageStorageService.saveImage(afterImage)
             
-            // 2. MealRecord 생성
             let record = MealRecord(
                 category: selectedCategory,
                 beforeImagePath: beforePath,
@@ -281,13 +338,8 @@ struct RecordFormView: View {
                 memo: memo.isEmpty ? nil : memo
             )
             
-            // 3. SwiftData에 저장
             await MainActor.run {
                 modelContext.insert(record)
-            }
-            
-            // 4. 저장 완료 → 루트(아카이브)로 복귀
-            await MainActor.run {
                 isSaving = false
                 onSaveComplete()
             }
@@ -301,12 +353,96 @@ struct RecordFormView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        RecordFormView(
-            beforeImage: UIImage(named: "SampleGukbap") ?? UIImage(),
-            afterImage: UIImage(named: "SampleRamen") ?? UIImage()
-        )
+// MARK: - Artisan Taste Slider
+
+struct ArtisanTasteSlider: View {
+    let dimension: TasteDimension
+    @Binding var value: Int
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            HStack {
+                Text(dimension.name)
+                    .font(.body)
+                    .fontDesign(.serif)
+                    .fontWeight(.bold)
+                    .foregroundStyle(Color.charcoalBlack)
+                
+                Spacer()
+                
+                Text(dimension.feedback(for: value))
+                    .font(.caption)
+                    .fontDesign(.serif)
+                    .foregroundStyle(Color.charcoalBlack.opacity(0.6))
+            }
+            
+            // 커스텀 슬라이더 트랙
+            GeometryReader { geo in
+                let width = geo.size.width
+                let step = width / 6
+                
+                ZStack(alignment: .leading) {
+                    // 트랙 (붓터치 느낌의 선)
+                    Rectangle()
+                        .fill(Color.charcoalBlack.opacity(0.1))
+                        .frame(height: 2)
+                    
+                    // 눈금 (손으로 찍은 점)
+                    HStack(spacing: 0) {
+                        ForEach(0..<7) { i in
+                            Circle()
+                                .fill(Color.charcoalBlack.opacity(i < value ? 0.8 : 0.2))
+                                .frame(width: 4, height: 4)
+                            if i < 6 { Spacer() }
+                        }
+                    }
+                    
+                    // 썸 (재료 - 고추, 소금 등)
+                    Text(dimension.icon) // 이모지를 재료로 사용
+                        .font(.system(size: 24))
+                        .shadow(color: .black.opacity(0.2), radius: 2, x: 1, y: 1)
+                        .position(x: CGFloat(value - 1) * step, y: 10) // 중앙 정렬 보정
+                }
+                .contentShape(Rectangle())
+                .gesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { value in
+                            let percent = min(max(value.location.x / width, 0), 1)
+                            let newValue = Int(round(percent * 6)) + 1
+                            if self.value != newValue {
+                                UISelectionFeedbackGenerator().selectionChanged()
+                                self.value = newValue
+                            }
+                        }
+                )
+            }
+            .frame(height: 30)
+        }
     }
-    .modelContainer(for: MealRecord.self, inMemory: true)
+}
+
+// MARK: - Press Actions Modifier
+
+extension View {
+    func pressEvents(onPress: @escaping (Bool) -> Void) -> some View {
+        buttonStyle(PressButtonStyle(onPress: onPress))
+    }
+}
+
+struct PressButtonStyle: ButtonStyle {
+    var onPress: (Bool) -> Void
+    
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .onChange(of: configuration.isPressed) { newValue in
+                onPress(newValue)
+            }
+    }
+}
+
+#Preview {
+    RecordFormView(
+        beforeImage: UIImage(),
+        afterImage: UIImage()
+    )
 }

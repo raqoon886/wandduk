@@ -10,6 +10,7 @@
 		08DCEFB451F908AC32999D78 /* WanddukApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EA2768C2FA6DEC12CBD141C /* WanddukApp.swift */; };
 		0D06A819C828A1C5B9B4B6FB /* CameraPhotoCaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8566E7061CBAB72F92BDA6 /* CameraPhotoCaptureService.swift */; };
 		1164CCC2AD853DDEA9827AFD /* TasteSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2845578937445B0EAC6E7B0 /* TasteSlider.swift */; };
+		248A44096696EE7875A37F5A /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 118D5A56EB2552A239CB0B2C /* DesignSystem.swift */; };
 		2869F0B77EBAFE53CB8038BF /* DailyRecordListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4DB386D0B9886B8ECCD961C /* DailyRecordListView.swift */; };
 		48BF3ADC7F81774989549822 /* PhotoCaptureProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C279A0D8F805581DD4D6B5B /* PhotoCaptureProtocol.swift */; };
 		4C61AAEDABE84A5F0549099C /* MockPhotoCaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78778BA9A6F3887F6D6EF06F /* MockPhotoCaptureService.swift */; };
@@ -26,6 +27,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		118D5A56EB2552A239CB0B2C /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		1C279A0D8F805581DD4D6B5B /* PhotoCaptureProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureProtocol.swift; sourceTree = "<group>"; };
 		2B8566E7061CBAB72F92BDA6 /* CameraPhotoCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPhotoCaptureService.swift; sourceTree = "<group>"; };
 		3D31F01AEF6D61DC70BA77C4 /* Wandduk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Wandduk.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -97,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				F31EC7A92298C70E9FA3239A /* CaptureView.swift */,
+				118D5A56EB2552A239CB0B2C /* DesignSystem.swift */,
 				6C104DBF5892A44A15C17EAF /* RecordDetailView.swift */,
 				C214F300710339D06CCE2831 /* RecordFormView.swift */,
 				4ECBC103BD9BAFFF9CF4F0E2 /* Components */,
@@ -192,6 +195,7 @@
 				61D81C021FE18E040CD11A11 /* CaptureView.swift in Sources */,
 				C3FD03F34ED2D0F26AEC1C44 /* ContentView.swift in Sources */,
 				2869F0B77EBAFE53CB8038BF /* DailyRecordListView.swift in Sources */,
+				248A44096696EE7875A37F5A /* DesignSystem.swift in Sources */,
 				F85D1DE02F75DC0EF5E6699F /* ImageStorageService.swift in Sources */,
 				77FF78A3B90C0D598D3E78E2 /* MealRecord.swift in Sources */,
 				4C61AAEDABE84A5F0549099C /* MockPhotoCaptureService.swift in Sources */,

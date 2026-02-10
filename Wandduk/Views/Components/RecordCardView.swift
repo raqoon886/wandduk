@@ -1,61 +1,45 @@
 import SwiftUI
 
-/// 아카이브 그리드에 표시되는 기록 카드
 struct RecordCardView: View {
     let record: MealRecord
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // 썸네일 이미지
+            // 썸네일
             Group {
                 if let image = ImageStorageService.loadImage(at: record.beforeImagePath) {
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFill()
                 } else {
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.15))
-                        .overlay {
-                            Image(systemName: "photo")
-                                .font(.title)
-                                .foregroundStyle(.tertiary)
-                        }
+                    Rectangle().fill(Color.gray.opacity(0.2))
                 }
             }
             .frame(height: 160)
             .clipped()
             
-            // 하단 정보
-            VStack(alignment: .leading, spacing: 4) {
-                // 카테고리 + 이모지
-                HStack(spacing: 4) {
+            // 정보 (종이 질감 하단)
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text(record.category).font(.headline).fontDesign(.serif)
+                    Spacer()
                     Text(record.categoryEmoji)
-                        .font(.caption)
-                    Text(record.category)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
                 }
                 
-                // 날짜
-                Text(record.createdAt, format: .dateTime.month().day().weekday())
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                Text(record.createdAt, format: .dateTime.month().day())
+                    .font(.caption)
+                    .fontDesign(.monospaced)
+                    .foregroundStyle(Color.charcoalBlack.opacity(0.6))
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
+            .padding(12)
+            .background(Color.white)
         }
-        .background(.background)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .shadow(color: .black.opacity(0.08), radius: 6, y: 3)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 4)) // 둥근 모서리 대신 각지게
+        .shadow(color: .black.opacity(0.1), radius: 3, x: 2, y: 2) // 종이 그림자
+        .overlay(
+            RoundedRectangle(cornerRadius: 4)
+                .stroke(Color.charcoalBlack.opacity(0.05), lineWidth: 1)
+        )
     }
-}
-
-#Preview {
-    RecordCardView(record: MealRecord(
-        category: "국밥",
-        beforeImagePath: "",
-        afterImagePath: ""
-    ))
-    .frame(width: 170)
-    .padding()
 }

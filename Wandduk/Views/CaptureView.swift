@@ -1,13 +1,10 @@
 import SwiftUI
 
-/// 촬영 화면 - Before/After 2단계 촬영 플로우
 struct CaptureView: View {
     @Environment(\.dismiss) private var dismiss
     
-    /// 루트(아카이브)로 돌아가기 위한 바인딩
     @Binding var dismissToRoot: Bool
     
-    /// 시뮬레이터 여부
     private var isSimulator: Bool {
         #if targetEnvironment(simulator)
         return true
@@ -16,62 +13,44 @@ struct CaptureView: View {
         #endif
     }
     
-    /// Mock 촬영 서비스 (시뮬레이터용)
     private let mockService = MockPhotoCaptureService()
     
-    /// 현재 촬영 단계
     @State private var currentStep: CaptureType = .before
-    
-    /// 촬영된 이미지
     @State private var beforeImage: UIImage?
     @State private var afterImage: UIImage?
-    
-    /// 촬영 중 로딩 상태 (시뮬레이터 Mock용)
     @State private var isCapturing = false
-    
-    /// 카메라 시트 표시 (실기기용)
     @State private var showCamera = false
-    
-    /// 기록지 화면으로 이동
     @State private var showRecordForm = false
     
     var body: some View {
-        VStack(spacing: 0) {
-            // 상단: 단계 인디케이터
-            stepIndicator
-                .padding(.top, 8)
+        ZStack {
+            // 배경: 검은색 (카메라 뷰파인더 느낌)
+            Color.black.ignoresSafeArea()
             
-            // 중앙: 프리뷰 영역
-            previewArea
-            
-            // 하단: 촬영 버튼
-            captureButton
-                .padding(.bottom, 40)
+            VStack(spacing: 0) {
+                // 단계 표시
+                stepIndicator
+                    .padding(.top, 16)
+                
+                Spacer()
+                
+                // 뷰파인더 영역
+                viewFinder
+                    .padding(.horizontal, 20)
+                
+                Spacer()
+                
+                // 셔터 버튼
+                shutterButton
+                    .padding(.bottom, 40)
+            }
         }
         .navigationTitle(currentStep.title)
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(currentStep == .after && beforeImage != nil)
-        .toolbar {
-            if currentStep == .after && beforeImage != nil {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("이전") {
-                        withAnimation {
-                            currentStep = .before
-                            afterImage = nil
-                        }
-                    }
-                }
-            }
-        }
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .sheet(isPresented: $showCamera) {
             CameraPickerView { image in
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    if currentStep == .before {
-                        beforeImage = image
-                    } else {
-                        afterImage = image
-                    }
-                }
+                handleImageCaptured(image)
             }
         }
         .navigationDestination(isPresented: $showRecordForm) {
@@ -87,129 +66,120 @@ struct CaptureView: View {
     
     private var stepIndicator: some View {
         HStack(spacing: 8) {
-            stepDot(for: .before)
-            Rectangle()
-                .fill(afterImage != nil ? Color.orange : Color.gray.opacity(0.3))
-                .frame(width: 40, height: 2)
-            stepDot(for: .after)
+            Text(currentStep == .before ? "식사 전" : "완뚝 인증")
+                .font(.headline)
+                .fontDesign(.serif)
+                .foregroundStyle(.white)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(
+                    Capsule()
+                        .fill(Color.charcoalBlack.opacity(0.6))
+                        .overlay(Capsule().stroke(Color.white.opacity(0.2), lineWidth: 1))
+                )
         }
-        .padding(.vertical, 16)
     }
     
-    private func stepDot(for step: CaptureType) -> some View {
-        let isCompleted = (step == .before && beforeImage != nil) || (step == .after && afterImage != nil)
-        let isCurrent = step == currentStep
-        
-        return Circle()
-            .fill(isCompleted ? Color.orange : (isCurrent ? Color.orange.opacity(0.5) : Color.gray.opacity(0.3)))
-            .frame(width: 12, height: 12)
-            .overlay {
-                if isCompleted {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 8, weight: .bold))
-                        .foregroundStyle(.white)
-                }
-            }
-    }
-    
-    private var previewArea: some View {
-        GeometryReader { geometry in
+    private var viewFinder: some View {
+        GeometryReader { geo in
             ZStack {
-                // 배경
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(Color.black.opacity(0.05))
-                
-                // 촬영된 이미지 또는 플레이스홀더
                 if let image = currentImage {
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFill()
-                        .frame(width: geometry.size.width - 32, height: geometry.size.height - 32)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .clipped()
                 } else {
-                    VStack(spacing: 16) {
-                        Image(systemName: currentStep == .before ? "fork.knife.circle" : "checkmark.circle")
-                            .font(.system(size: 60))
-                            .foregroundStyle(.orange.opacity(0.6))
-                        
-                        Text(currentStep.instruction)
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                    }
+                    // 빈 화면: 그리드 표시
+                    Color.black.opacity(0.5)
+                    gridLines
                 }
                 
-                // 로딩 오버레이 (시뮬레이터 Mock 촬영 시)
-                if isCapturing {
-                    RoundedRectangle(cornerRadius: 24)
-                        .fill(.ultraThinMaterial)
-                    ProgressView()
-                        .scaleEffect(1.5)
+                // 김 서림 효과 (Steaming Effect) - After 단계일 때
+                if currentStep == .after {
+                    steamingOverlay
                 }
             }
-            .padding(16)
+            .clipShape(RoundedRectangle(cornerRadius: 4)) // 약간 각진 느낌
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+            )
+        }
+        .aspectRatio(1, contentMode: .fit)
+    }
+    
+    private var gridLines: some View {
+        ZStack {
+            HStack {
+                Spacer(); Divider().background(.white.opacity(0.2)); Spacer(); Divider().background(.white.opacity(0.2)); Spacer()
+            }
+            VStack {
+                Spacer(); Divider().background(.white.opacity(0.2)); Spacer(); Divider().background(.white.opacity(0.2)); Spacer()
+            }
         }
     }
+    
+    private var steamingOverlay: some View {
+        // 김 서림: 가장자리가 뿌옇게, 약간의 노이즈
+        ZStack {
+            RadialGradient(
+                colors: [.clear, .white.opacity(0.15)],
+                center: .center,
+                startRadius: 50,
+                endRadius: 200
+            )
+            .blendMode(.screen)
+        }
+    }
+    
+    private var shutterButton: some View {
+        Button {
+             capturePhoto()
+        } label: {
+            ZStack {
+                Circle()
+                    .stroke(Color.white, lineWidth: 4)
+                    .frame(width: 80, height: 80)
+                
+                Circle()
+                    .fill(currentStep == .before ? Color.white : Color.lavaOrange)
+                    .frame(width: 70, height: 70)
+                    .scaleEffect(isCapturing ? 0.9 : 1.0)
+            }
+        }
+        .disabled(isCapturing)
+        .overlay(alignment: .trailing) {
+            // 다음 단계 버튼
+            if currentImage != nil {
+                Button {
+                    proceedToNextStep()
+                } label: {
+                    Image(systemName: "arrow.right")
+                        .font(.title)
+                        .foregroundStyle(.white)
+                        .frame(width: 50, height: 50)
+                        .background(Color.lavaOrange)
+                        .clipShape(Circle())
+                }
+                .offset(x: 80)
+            }
+        }
+    }
+    
+    // MARK: - Logic
     
     private var currentImage: UIImage? {
         currentStep == .before ? beforeImage : afterImage
     }
     
-    private var captureButton: some View {
-        VStack(spacing: 16) {
-            // 촬영 버튼
-            Button {
-                capturePhoto()
-            } label: {
-                ZStack {
-                    Circle()
-                        .stroke(Color.orange, lineWidth: 4)
-                        .frame(width: 80, height: 80)
-                    
-                    Circle()
-                        .fill(Color.orange)
-                        .frame(width: 64, height: 64)
-                    
-                    Image(systemName: "camera.fill")
-                        .font(.title)
-                        .foregroundStyle(.white)
-                }
-            }
-            .disabled(isCapturing)
-            
-            // 다음 단계로 진행 버튼 (촬영 완료 시)
-            if currentImage != nil {
-                Button {
-                    proceedToNextStep()
-                } label: {
-                    Text(currentStep == .before ? "다음" : "기록하기")
-                        .font(.headline)
-                        .frame(width: 200)
-                        .padding(.vertical, 12)
-                        .background(Color.orange)
-                        .foregroundStyle(.white)
-                        .clipShape(Capsule())
-                }
-            }
-        }
-    }
-    
-    // MARK: - Actions
-    
-    /// 시뮬레이터: Mock 서비스로 즉시 촬영, 실기기: 카메라 시트 표시
     private func capturePhoto() {
         if isSimulator {
+            isCapturing = true
             Task {
-                isCapturing = true
                 let image = await mockService.capturePhoto(type: currentStep)
                 await MainActor.run {
-                    isCapturing = false
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        if currentStep == .before {
-                            beforeImage = image
-                        } else {
-                            afterImage = image
-                        }
-                    }
+                    handleImageCaptured(image)
                 }
             }
         } else {
@@ -217,13 +187,21 @@ struct CaptureView: View {
         }
     }
     
+    private func handleImageCaptured(_ image: UIImage?) {
+        withAnimation {
+            if currentStep == .before {
+                beforeImage = image
+            } else {
+                afterImage = image
+            }
+            isCapturing = false
+        }
+    }
+    
     private func proceedToNextStep() {
         if currentStep == .before {
-            withAnimation {
-                currentStep = .after
-            }
+            withAnimation { currentStep = .after }
         } else {
-            // 기록지로 이동
             showRecordForm = true
         }
     }
