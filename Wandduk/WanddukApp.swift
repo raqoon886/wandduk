@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 @main
 struct WanddukApp: App {
@@ -6,5 +7,6 @@ struct WanddukApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: MealRecord.self)
     }
 }
