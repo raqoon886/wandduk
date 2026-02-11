@@ -18,8 +18,10 @@ final class MockPhotoCaptureService: PhotoCaptureProtocol {
             return UIImage(named: imageName)
             
         case .after:
-            // 완뚝 인증: 빈 뚝배기 이미지 반환
-            return UIImage(named: "EmptyTtukbaegi")
+            // 완뚝 인증: 빈 뚝배기(매운맛/맑은맛) 중 랜덤 반환
+            let emptyBowls = ["EmptyTtukbaegi", "EmptyGomtang"]
+            guard let imageName = emptyBowls.randomElement() else { return nil }
+            return UIImage(named: imageName)
         }
     }
 }
