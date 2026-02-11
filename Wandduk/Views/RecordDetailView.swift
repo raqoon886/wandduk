@@ -8,8 +8,7 @@ struct RecordDetailView: View {
     let record: MealRecord
     @State private var showDeleteConfirmation = false
     @State private var showEditSheet = false
-    @State private var selectedImageForZoom: UIImage?
-    @State private var isZoomPresented = false
+    @State private var selectedZoomItem: ImageItem?
     
     var body: some View {
         ScrollView {
@@ -83,23 +82,21 @@ struct RecordDetailView: View {
                 RecordFormView(editingRecord: record)
             }
         }
-        .fullScreenCover(isPresented: $isZoomPresented) {
-            if let image = selectedImageForZoom {
-                ZStack(alignment: .topTrailing) {
-                    Color.black.ignoresSafeArea()
-                    
-                    ZoomableImageView(image: image)
-                        .ignoresSafeArea()
-                    
-                    Button {
-                        isZoomPresented = false
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.largeTitle)
-                            .foregroundStyle(.white)
-                            .padding()
-                            .padding(.top, 40)
-                    }
+        .fullScreenCover(item: $selectedZoomItem) { item in
+            ZStack(alignment: .topTrailing) {
+                Color.black.ignoresSafeArea()
+                
+                ZoomableImageView(image: item.image)
+                    .ignoresSafeArea()
+                
+                Button {
+                    selectedZoomItem = nil
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.largeTitle)
+                        .foregroundStyle(.white)
+                        .padding()
+                        .padding(.top, 40)
                 }
             }
         }
@@ -113,8 +110,7 @@ struct RecordDetailView: View {
                     .scaledToFill()
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        selectedImageForZoom = image
-                        isZoomPresented = true
+                        selectedZoomItem = ImageItem(image: image)
                     }
             } else {
                 Rectangle().fill(Color.gray.opacity(0.2))
@@ -160,6 +156,12 @@ struct RecordDetailView: View {
         modelContext.delete(record)
         dismiss()
     }
+}
+
+// MARK: - ImageItem
+struct ImageItem: Identifiable {
+    let id = UUID()
+    let image: UIImage
 }
 
 // MARK: - ZoomableImageView
