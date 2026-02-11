@@ -3,8 +3,12 @@ import SwiftData
 
 /// 기록지 화면 - "을지로 40년 전통의 주문서" 컨셉
 struct RecordFormView: View {
-    let beforeImage: UIImage
-    let afterImage: UIImage
+    // New Record Mode: Images are passed directly
+    let beforeImage: UIImage?
+    let afterImage: UIImage?
+    
+    // Edit Mode: Existing record is passed
+    let editingRecord: MealRecord?
     
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -39,6 +43,13 @@ struct RecordFormView: View {
     // 햅틱 피드백
     private let heavyImpact = UIImpactFeedbackGenerator(style: .heavy)
     private let rigidImpact = UIImpactFeedbackGenerator(style: .rigid)
+    
+    init(beforeImage: UIImage? = nil, afterImage: UIImage? = nil, editingRecord: MealRecord? = nil, onSaveComplete: @escaping () -> Void = {}) {
+        self.beforeImage = beforeImage
+        self.afterImage = afterImage
+        self.editingRecord = editingRecord
+        self.onSaveComplete = onSaveComplete
+    }
     
     var body: some View {
         ZStack {
@@ -82,6 +93,17 @@ struct RecordFormView: View {
                 impactVisualEffect
             }
         }
+        .onAppear {
+            if let record = editingRecord {
+                selectedCategory = record.category
+                memo = record.memo ?? ""
+                tasteValues["saltiness"] = record.saltiness
+                tasteValues["richness"] = record.richness
+                tasteValues["spiciness"] = record.spiciness
+                tasteValues["portion"] = record.portion
+                tasteValues["sideDish"] = record.sideDish
+            }
+        }
     }
     
     // MARK: - Visual Sections
@@ -96,12 +118,12 @@ struct RecordFormView: View {
             
             HStack(spacing: 0) {
                 // Before (약간 왼쪽으로 기울임)
-                polaroidView(image: beforeImage, label: "먹기 전")
+                polaroidView(image: displayBeforeImage, label: "먹기 전")
                     .rotationEffect(.degrees(-1.5))
                     .zIndex(1)
                 
                 // After (약간 오른쪽으로 기울이고 겹침)
-                polaroidView(image: afterImage, label: "완뚝 검증")
+                polaroidView(image: displayAfterImage, label: "완뚝 검증")
                     .rotationEffect(.degrees(2.0))
                     .offset(x: -15)
                     .zIndex(2)
@@ -109,17 +131,25 @@ struct RecordFormView: View {
         }
     }
     
-    private func polaroidView(image: UIImage, label: String) -> some View {
+    private func polaroidView(image: UIImage?, label: String) -> some View {
         VStack(spacing: 8) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 150, height: 150)
-                .clipShape(RoundedRectangle(cornerRadius: 4))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 4)
-                        .stroke(Color.charcoalBlack.opacity(0.1), lineWidth: 1)
-                )
+            Group {
+                if let image = image {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.1))
+                        .overlay(Image(systemName: "photo").foregroundStyle(.tertiary))
+                }
+            }
+            .frame(width: 150, height: 150)
+            .clipShape(RoundedRectangle(cornerRadius: 4))
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(Color.charcoalBlack.opacity(0.1), lineWidth: 1)
+            )
             
             Text(label)
                 .font(.caption)
@@ -129,6 +159,24 @@ struct RecordFormView: View {
         .padding(10)
         .background(Color.white)
         .shadow(color: .black.opacity(0.15), radius: 5, x: 2, y: 3)
+    }
+    
+    // MARK: - Helpers
+    
+    private var displayBeforeImage: UIImage? {
+        if let image = beforeImage { return image }
+        if let record = editingRecord, let url = record.beforeImageURL {
+            return UIImage(contentsOfFile: url.path)
+        }
+        return nil
+    }
+
+    private var displayAfterImage: UIImage? {
+        if let image = afterImage { return image }
+        if let record = editingRecord, let url = record.afterImageURL {
+            return UIImage(contentsOfFile: url.path)
+        }
+        return nil
     }
     
     private var orderSheetSection: some View {
@@ -224,7 +272,7 @@ struct RecordFormView: View {
                     .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 2)
                 
                 // 2. 텍스트 (빨간색 '완뚝' 궁서체 도장 - 솥뚜껑 대비 작게)
-                Text("완뚝")
+                Text(editingRecord != nil ? "수정" : "완뚝")
                     .font(.custom("GungSeo", size: 24)) // 32 -> 24로 줄여서 여백 확보
                     .foregroundStyle(Color.kimchiRed)
                     .shadow(color: .kimchiRed.opacity(0.5), radius: isPressingComplete ? 8 : 2)
@@ -315,9 +363,34 @@ struct RecordFormView: View {
     private func saveRecord() async {
         isSaving = true
         
+        // Edit Mode
+        if let record = editingRecord {
+            record.category = selectedCategory
+            record.memo = memo.isEmpty ? nil : memo
+            record.saltiness = tasteValues["saltiness"] ?? 4
+            record.richness = tasteValues["richness"] ?? 4
+            record.spiciness = tasteValues["spiciness"] ?? 4
+            record.portion = tasteValues["portion"] ?? 4
+            record.sideDish = tasteValues["sideDish"] ?? 4
+            
+            // TODO: 이미지 수정 기능이 필요하다면 여기서 처리
+            
+            await MainActor.run {
+                // SwiftData 컨텍스트 저장 (자동 처리되지만 명시적 호출 가능)
+                try? modelContext.save()
+                isSaving = false
+                onSaveComplete()
+                dismiss() // 시트 닫기
+            }
+            return
+        }
+        
+        // Create Mode
         do {
-            let beforePath = try ImageStorageService.saveImage(beforeImage)
-            let afterPath = try ImageStorageService.saveImage(afterImage)
+            guard let before = beforeImage, let after = afterImage else { return }
+            
+            let beforePath = try ImageStorageService.saveImage(before)
+            let afterPath = try ImageStorageService.saveImage(after)
             
             let record = MealRecord(
                 category: selectedCategory,

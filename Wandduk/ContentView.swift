@@ -80,6 +80,11 @@ struct ContentView: View {
                 CaptureView(dismissToRoot: $showCapture)
             }
             .overlay(deleteAlert)
+            .fullScreenCover(item: $editingRecord) { record in
+                NavigationStack {
+                    RecordFormView(editingRecord: record)
+                }
+            }
         }
     }
     
@@ -133,6 +138,12 @@ struct ContentView: View {
                         RecordCardView(record: record)
                             .wabiSabi() // 카드마다 미세한 회전
                             .contextMenu {
+                                Button {
+                                    editingRecord = record
+                                } label: {
+                                    Label("제멋대로 수정하기 (수정)", systemImage: "pencil")
+                                }
+                                
                                 Button(role: .destructive) {
                                     selectedRecordToDelete = record
                                     showDeleteAlert = true
@@ -167,6 +178,9 @@ struct ContentView: View {
                     onDelete: { record in
                         selectedRecordToDelete = record
                         showDeleteAlert = true
+                    },
+                    onEdit: { record in
+                        editingRecord = record
                     }
                 )
                 .padding(.bottom, 100)
@@ -208,6 +222,7 @@ struct ContentView: View {
     
     @State private var showDeleteAlert = false
     @State private var selectedRecordToDelete: MealRecord?
+    @State private var editingRecord: MealRecord?
     @Environment(\.modelContext) private var modelContext
     
     private func deleteRecord(_ record: MealRecord) {

@@ -5,6 +5,7 @@ struct DailyRecordListView: View {
     let records: [MealRecord]
     let selectedDate: Date
     var onDelete: ((MealRecord) -> Void)? = nil
+    var onEdit: ((MealRecord) -> Void)? = nil
     
     private let calendar = Calendar.current
     
@@ -50,6 +51,12 @@ struct DailyRecordListView: View {
                         } label: {
                             dailyRecordRow(record)
                                 .contextMenu {
+                                    Button {
+                                        onEdit?(record)
+                                    } label: {
+                                        Label("제멋대로 수정하기 (수정)", systemImage: "pencil")
+                                    }
+                                    
                                     Button(role: .destructive) {
                                         onDelete?(record)
                                     } label: {

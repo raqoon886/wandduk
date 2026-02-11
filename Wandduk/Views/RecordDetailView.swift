@@ -7,6 +7,7 @@ struct RecordDetailView: View {
     
     let record: MealRecord
     @State private var showDeleteConfirmation = false
+    @State private var showEditSheet = false
     
     var body: some View {
         ScrollView {
@@ -67,6 +68,18 @@ struct RecordDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .confirmationDialog("삭제", isPresented: $showDeleteConfirmation) {
             Button("삭제", role: .destructive) { deleteRecord() }
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("수정") {
+                    showEditSheet = true
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $showEditSheet) {
+            NavigationStack {
+                RecordFormView(editingRecord: record)
+            }
         }
     }
     
