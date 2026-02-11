@@ -11,12 +11,15 @@ struct RecordCardView: View {
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFill()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 160)
+                        .clipped()
                 } else {
-                    Rectangle().fill(Color.gray.opacity(0.2))
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 160)
                 }
             }
-            .frame(height: 160)
-            .clipped()
             
             // 정보 (종이 질감 하단)
             VStack(alignment: .leading, spacing: 6) {
