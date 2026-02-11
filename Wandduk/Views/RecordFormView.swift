@@ -67,7 +67,6 @@ struct RecordFormView: View {
             VStack {
                 Spacer()
                 wanttukButton
-                    .padding(.bottom, 20)
             }
         }
         .navigationTitle("식사 기록")
@@ -220,7 +219,7 @@ struct RecordFormView: View {
                 Image("SotTtukKeong")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 120, height: 120)
+                    .frame(width: 150, height: 150)
                     .clipShape(Circle())
                     .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 2)
                 
