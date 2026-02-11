@@ -4,6 +4,7 @@ import SwiftUI
 struct DailyRecordListView: View {
     let records: [MealRecord]
     let selectedDate: Date
+    var onDelete: ((MealRecord) -> Void)? = nil
     
     private let calendar = Calendar.current
     
@@ -48,6 +49,13 @@ struct DailyRecordListView: View {
                             RecordDetailView(record: record)
                         } label: {
                             dailyRecordRow(record)
+                                .contextMenu {
+                                    Button(role: .destructive) {
+                                        onDelete?(record)
+                                    } label: {
+                                        Label("기록 태우기 (삭제)", systemImage: "flame")
+                                    }
+                                }
                         }
                         .buttonStyle(.plain)
                     }

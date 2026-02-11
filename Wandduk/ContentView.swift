@@ -76,9 +76,10 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationDestination(isPresented: $showCapture) {
+            .fullScreenCover(isPresented: $showCapture) {
                 CaptureView(dismissToRoot: $showCapture)
             }
+            .overlay(deleteAlert)
         }
     }
     
@@ -131,12 +132,19 @@ struct ContentView: View {
                     } label: {
                         RecordCardView(record: record)
                             .wabiSabi() // 카드마다 미세한 회전
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    selectedRecordToDelete = record
+                                    showDeleteAlert = true
+                                } label: {
+                                    Label("기록 태우기 (삭제)", systemImage: "flame")
+                                }
+                            }
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .padding(16)
-            .padding(.bottom, 100)
+            .padding()
         }
     }
     
@@ -155,7 +163,11 @@ struct ContentView: View {
                 
                 DailyRecordListView(
                     records: records,
-                    selectedDate: selectedDate
+                    selectedDate: selectedDate,
+                    onDelete: { record in
+                        selectedRecordToDelete = record
+                        showDeleteAlert = true
+                    }
                 )
                 .padding(.bottom, 100)
             }
@@ -190,6 +202,46 @@ struct ContentView: View {
             counts[components, default: 0] += 1
         }
         return counts
+    }
+    
+    // MARK: - Deletion Logic
+    
+    @State private var showDeleteAlert = false
+    @State private var selectedRecordToDelete: MealRecord?
+    @Environment(\.modelContext) private var modelContext
+    
+    private func deleteRecord(_ record: MealRecord) {
+        // 1. 이미지 파일 삭제
+        if let documentsUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let beforeParams = record.beforeImagePath.split(separator: "/")
+            if let last = beforeParams.last {
+                let fileUrl = documentsUrl.appendingPathComponent(String(last))
+                try? FileManager.default.removeItem(at: fileUrl)
+            }
+            
+            let afterParams = record.afterImagePath.split(separator: "/")
+            if let last = afterParams.last {
+                let fileUrl = documentsUrl.appendingPathComponent(String(last))
+                try? FileManager.default.removeItem(at: fileUrl)
+            }
+        }
+        
+        // 2. 데이터베이스에서 삭제
+        modelContext.delete(record)
+    }
+    
+    private var deleteAlert: some View {
+        EmptyView()
+            .alert("기록을 태우시겠습니까?", isPresented: $showDeleteAlert) {
+                Button("취소", role: .cancel) {}
+                Button("태우기", role: .destructive) {
+                    if let record = selectedRecordToDelete {
+                        deleteRecord(record)
+                    }
+                }
+            } message: {
+                Text("삭제된 기록은 되돌릴 수 없습니다.")
+            }
     }
 }
 
