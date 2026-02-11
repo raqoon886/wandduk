@@ -23,40 +23,50 @@ struct CaptureView: View {
     @State private var showRecordForm = false
     
     var body: some View {
-        ZStack {
-            // 배경: 검은색 (카메라 뷰파인더 느낌)
-            Color.black.ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                // 단계 표시
-                stepIndicator
-                    .padding(.top, 16)
+        NavigationStack {
+            ZStack {
+                // 배경: 검은색 (카메라 뷰파인더 느낌)
+                Color.black.ignoresSafeArea()
                 
-                Spacer()
-                
-                // 뷰파인더 영역
-                viewFinder
-                    .padding(.horizontal, 20)
-                
-                Spacer()
-                
-                // 셔터 버튼
-                shutterButton
-                    .padding(.bottom, 40)
+                VStack(spacing: 0) {
+                    // 단계 표시
+                    stepIndicator
+                        .padding(.top, 16)
+                    
+                    Spacer()
+                    
+                    // 뷰파인더 영역
+                    viewFinder
+                        .padding(.horizontal, 20)
+                    
+                    Spacer()
+                    
+                    // 셔터 버튼
+                    shutterButton
+                        .padding(.bottom, 40)
+                }
             }
-        }
-        .navigationTitle(currentStep.title)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarColorScheme(.dark, for: .navigationBar)
-        .sheet(isPresented: $showCamera) {
-            CameraPickerView { image in
-                handleImageCaptured(image)
+            .navigationTitle(currentStep.title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .sheet(isPresented: $showCamera) {
+                CameraPickerView { image in
+                    handleImageCaptured(image)
+                }
             }
-        }
-        .navigationDestination(isPresented: $showRecordForm) {
-            if let before = beforeImage, let after = afterImage {
-                RecordFormView(beforeImage: before, afterImage: after) {
-                    dismissToRoot = false
+            .navigationDestination(isPresented: $showRecordForm) {
+                if let before = beforeImage, let after = afterImage {
+                    RecordFormView(beforeImage: before, afterImage: after) {
+                        dismissToRoot = false
+                    }
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("취소") {
+                        dismiss()
+                    }
+                    .foregroundStyle(.white)
                 }
             }
         }
