@@ -11,109 +11,88 @@ struct RecordDetailView: View {
     @State private var selectedZoomItem: ImageItem?
     
     var body: some View {
-        ZStack {
-            ScrollView {
-                VStack(spacing: 0) {
-                    // 영수증/메뉴판 컨셉의 카드
-                    VStack(spacing: 24) {
-                        // 상단 사진
-                        HStack(spacing: 12) {
-                            polaroid(imagePath: record.beforeImagePath)
-                            Image(systemName: "arrow.right")
-                                .foregroundStyle(Color.charcoalBlack.opacity(0.5))
-                            polaroid(imagePath: record.afterImagePath)
-                        }
-                        
+        ScrollView {
+            VStack(spacing: 0) {
+                // 영수증/메뉴판 컨셉의 카드
+                VStack(spacing: 24) {
+                    // 상단 사진
+                    HStack(spacing: 12) {
+                        polaroid(imagePath: record.beforeImagePath)
+                        Image(systemName: "arrow.right")
+                            .foregroundStyle(Color.charcoalBlack.opacity(0.5))
+                        polaroid(imagePath: record.afterImagePath)
+                    }
+                    
+                    Divider().background(Color.charcoalBlack.opacity(0.2))
+                    
+                    // 맛 평가 도트
+                    tasteResultSection
+                    
+                    if let memo = record.memo {
                         Divider().background(Color.charcoalBlack.opacity(0.2))
-                        
-                        // 맛 평가 도트
-                        tasteResultSection
-                        
-                        if let memo = record.memo {
-                            Divider().background(Color.charcoalBlack.opacity(0.2))
-                            Text(memo)
-                                .font(.body)
-                                .fontDesign(.serif)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.vertical, 8)
-                        }
-                        
-                        // 날짜 스탬프
-                        HStack {
-                            Spacer()
-                            Text(record.createdAt, format: .dateTime.year().month().day())
-                                .font(.caption)
-                                .fontDesign(.monospaced)
-                                .foregroundStyle(Color.charcoalBlack.opacity(0.6))
-                        }
+                        Text(memo)
+                            .font(.body)
+                            .fontDesign(.serif)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 8)
                     }
-                    .padding(24)
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 2)) // 각진 영수증 느낌
-                    .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
-                    .padding(20)
                     
-                    // 삭제 버튼
-                    Button(role: .destructive) {
-                        showDeleteConfirmation = true
-                    } label: {
-                        Text("기록 태우기 (삭제)")
+                    // 날짜 스탬프
+                    HStack {
+                        Spacer()
+                        Text(record.createdAt, format: .dateTime.year().month().day())
                             .font(.caption)
-                            .foregroundStyle(Color.gray)
-                            .padding()
+                            .fontDesign(.monospaced)
+                            .foregroundStyle(Color.charcoalBlack.opacity(0.6))
                     }
                 }
-                .padding(.top, 20)
-            }
-            .background(Color.brothBeige.ignoresSafeArea())
-            .navigationTitle(record.category)
-            .navigationBarTitleDisplayMode(.inline)
-            .confirmationDialog("삭제", isPresented: $showDeleteConfirmation) {
-                Button("삭제", role: .destructive) { deleteRecord() }
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("수정") {
-                        showEditSheet = true
-                    }
+                .padding(24)
+                .background(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 2)) // 각진 영수증 느낌
+                .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+                .padding(20)
+                
+                // 삭제 버튼
+                Button(role: .destructive) {
+                    showDeleteConfirmation = true
+                } label: {
+                    Text("기록 태우기 (삭제)")
+                        .font(.caption)
+                        .foregroundStyle(Color.gray)
+                        .padding()
                 }
             }
-            .fullScreenCover(isPresented: $showEditSheet) {
-                NavigationStack {
-                    RecordFormView(editingRecord: record)
+            .padding(.top, 20)
+        }
+        .background(Color.brothBeige.ignoresSafeArea())
+        .navigationTitle(record.category)
+        .navigationBarTitleDisplayMode(.inline)
+        .confirmationDialog("삭제", isPresented: $showDeleteConfirmation) {
+            Button("삭제", role: .destructive) { deleteRecord() }
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("수정") {
+                    showEditSheet = true
                 }
-            }
-            
-            // Zoom Overlay
-            if let item = selectedZoomItem {
-                ZStack(alignment: .topTrailing) {
-                    Color.black.ignoresSafeArea()
-                    
-                    ZoomableImageView(image: item.image)
-                        .ignoresSafeArea()
-                        .onTapGesture {
-                            withAnimation {
-                                selectedZoomItem = nil
-                            }
-                        }
-                    
-                    Button {
-                        withAnimation {
-                            selectedZoomItem = nil
-                        }
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.largeTitle)
-                            .foregroundStyle(.white)
-                            .padding()
-                            .padding(.top, 40)
-                    }
-                }
-                .zIndex(1) // Ensure it's on top
-                .transition(.opacity.animation(.easeInOut(duration: 0.2)))
             }
         }
-        .toolbar(selectedZoomItem != nil ? .hidden : .visible, for: .navigationBar)
+        .fullScreenCover(isPresented: $showEditSheet) {
+            NavigationStack {
+                RecordFormView(editingRecord: record)
+            }
+        }
+        .fullScreenCover(item: $selectedZoomItem) { item in
+            ZoomOverlayView(image: item.image) {
+                // 애니메이션 없이 즉시 닫기 (내부적으로 페이드 아웃 후 호출됨)
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+                withTransaction(transaction) {
+                    selectedZoomItem = nil
+                }
+            }
+            .presentationBackground(.clear) // 배경 투명 처리 (iOS 16.4+)
+        }
     }
     
     private func polaroid(imagePath: String) -> some View {
@@ -124,7 +103,10 @@ struct RecordDetailView: View {
                     .scaledToFill()
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
+                        // 애니메이션 없이 시트 띄우기 (커스텀 페이드 인을 위해)
+                        var transaction = Transaction()
+                        transaction.disablesAnimations = true
+                        withTransaction(transaction) {
                             selectedZoomItem = ImageItem(image: image)
                         }
                     }
@@ -174,10 +156,56 @@ struct RecordDetailView: View {
     }
 }
 
-// MARK: - ImageItem
 struct ImageItem: Identifiable {
     let id = UUID()
     let image: UIImage
+}
+
+struct ZoomOverlayView: View {
+    let image: UIImage
+    let onDismiss: () -> Void
+    
+    @State private var appear = false
+    
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            Color.black.ignoresSafeArea()
+                .opacity(appear ? 1.0 : 0.0)
+            
+            ZoomableImageView(image: image)
+                .ignoresSafeArea()
+                .opacity(appear ? 1.0 : 0.0)
+                .onTapGesture {
+                    close()
+                }
+            
+            Button {
+                close()
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.largeTitle)
+                    .foregroundStyle(.white)
+                    .padding()
+                    .padding(.top, 40)
+                    .opacity(appear ? 1.0 : 0.0)
+            }
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.2)) {
+                appear = true
+            }
+        }
+    }
+    
+    private func close() {
+        withAnimation(.easeIn(duration: 0.2)) {
+            appear = false
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            onDismiss()
+        }
+    }
 }
 
 // MARK: - ZoomableImageView
