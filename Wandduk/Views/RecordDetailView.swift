@@ -11,95 +11,109 @@ struct RecordDetailView: View {
     @State private var selectedZoomItem: ImageItem?
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                // 영수증/메뉴판 컨셉의 카드
-                VStack(spacing: 24) {
-                    // 상단 사진
-                    HStack(spacing: 12) {
-                        polaroid(imagePath: record.beforeImagePath)
-                        Image(systemName: "arrow.right")
-                            .foregroundStyle(Color.charcoalBlack.opacity(0.5))
-                        polaroid(imagePath: record.afterImagePath)
-                    }
-                    
-                    Divider().background(Color.charcoalBlack.opacity(0.2))
-                    
-                    // 맛 평가 도트
-                    tasteResultSection
-                    
-                    if let memo = record.memo {
+        ZStack {
+            ScrollView {
+                VStack(spacing: 0) {
+                    // 영수증/메뉴판 컨셉의 카드
+                    VStack(spacing: 24) {
+                        // 상단 사진
+                        HStack(spacing: 12) {
+                            polaroid(imagePath: record.beforeImagePath)
+                            Image(systemName: "arrow.right")
+                                .foregroundStyle(Color.charcoalBlack.opacity(0.5))
+                            polaroid(imagePath: record.afterImagePath)
+                        }
+                        
                         Divider().background(Color.charcoalBlack.opacity(0.2))
-                        Text(memo)
-                            .font(.body)
-                            .fontDesign(.serif)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.vertical, 8)
+                        
+                        // 맛 평가 도트
+                        tasteResultSection
+                        
+                        if let memo = record.memo {
+                            Divider().background(Color.charcoalBlack.opacity(0.2))
+                            Text(memo)
+                                .font(.body)
+                                .fontDesign(.serif)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 8)
+                        }
+                        
+                        // 날짜 스탬프
+                        HStack {
+                            Spacer()
+                            Text(record.createdAt, format: .dateTime.year().month().day())
+                                .font(.caption)
+                                .fontDesign(.monospaced)
+                                .foregroundStyle(Color.charcoalBlack.opacity(0.6))
+                        }
                     }
+                    .padding(24)
+                    .background(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 2)) // 각진 영수증 느낌
+                    .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+                    .padding(20)
                     
-                    // 날짜 스탬프
-                    HStack {
-                        Spacer()
-                        Text(record.createdAt, format: .dateTime.year().month().day())
+                    // 삭제 버튼
+                    Button(role: .destructive) {
+                        showDeleteConfirmation = true
+                    } label: {
+                        Text("기록 태우기 (삭제)")
                             .font(.caption)
-                            .fontDesign(.monospaced)
-                            .foregroundStyle(Color.charcoalBlack.opacity(0.6))
+                            .foregroundStyle(Color.gray)
+                            .padding()
                     }
                 }
-                .padding(24)
-                .background(Color.white)
-                .clipShape(RoundedRectangle(cornerRadius: 2)) // 각진 영수증 느낌
-                .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
-                .padding(20)
-                
-                // 삭제 버튼
-                Button(role: .destructive) {
-                    showDeleteConfirmation = true
-                } label: {
-                    Text("기록 태우기 (삭제)")
-                        .font(.caption)
-                        .foregroundStyle(Color.gray)
-                        .padding()
+                .padding(.top, 20)
+            }
+            .background(Color.brothBeige.ignoresSafeArea())
+            .navigationTitle(record.category)
+            .navigationBarTitleDisplayMode(.inline)
+            .confirmationDialog("삭제", isPresented: $showDeleteConfirmation) {
+                Button("삭제", role: .destructive) { deleteRecord() }
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("수정") {
+                        showEditSheet = true
+                    }
                 }
             }
-            .padding(.top, 20)
-        }
-        .background(Color.brothBeige.ignoresSafeArea())
-        .navigationTitle(record.category)
-        .navigationBarTitleDisplayMode(.inline)
-        .confirmationDialog("삭제", isPresented: $showDeleteConfirmation) {
-            Button("삭제", role: .destructive) { deleteRecord() }
-        }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("수정") {
-                    showEditSheet = true
+            .fullScreenCover(isPresented: $showEditSheet) {
+                NavigationStack {
+                    RecordFormView(editingRecord: record)
                 }
             }
-        }
-        .fullScreenCover(isPresented: $showEditSheet) {
-            NavigationStack {
-                RecordFormView(editingRecord: record)
-            }
-        }
-        .fullScreenCover(item: $selectedZoomItem) { item in
-            ZStack(alignment: .topTrailing) {
-                Color.black.ignoresSafeArea()
-                
-                ZoomableImageView(image: item.image)
-                    .ignoresSafeArea()
-                
-                Button {
-                    selectedZoomItem = nil
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.largeTitle)
-                        .foregroundStyle(.white)
-                        .padding()
-                        .padding(.top, 40)
+            
+            // Zoom Overlay
+            if let item = selectedZoomItem {
+                ZStack(alignment: .topTrailing) {
+                    Color.black.ignoresSafeArea()
+                    
+                    ZoomableImageView(image: item.image)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            withAnimation {
+                                selectedZoomItem = nil
+                            }
+                        }
+                    
+                    Button {
+                        withAnimation {
+                            selectedZoomItem = nil
+                        }
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.largeTitle)
+                            .foregroundStyle(.white)
+                            .padding()
+                            .padding(.top, 40)
+                    }
                 }
+                .zIndex(1) // Ensure it's on top
+                .transition(.opacity.animation(.easeInOut(duration: 0.2)))
             }
         }
+        .toolbar(selectedZoomItem != nil ? .hidden : .visible, for: .navigationBar)
     }
     
     private func polaroid(imagePath: String) -> some View {
@@ -110,7 +124,9 @@ struct RecordDetailView: View {
                     .scaledToFill()
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        selectedZoomItem = ImageItem(image: image)
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            selectedZoomItem = ImageItem(image: image)
+                        }
                     }
             } else {
                 Rectangle().fill(Color.gray.opacity(0.2))
