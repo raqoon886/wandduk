@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct CaptureView: View {
     @Environment(\.dismiss) private var dismiss
@@ -21,6 +22,7 @@ struct CaptureView: View {
     @State private var isCapturing = false
     @State private var showCamera = false
     @State private var showRecordForm = false
+    @State private var selectedPhoto: PhotosPickerItem?
     
     var body: some View {
         NavigationStack {
@@ -42,8 +44,30 @@ struct CaptureView: View {
                     Spacer()
                     
                     // 셔터 버튼
-                    shutterButton
-                        .padding(.bottom, 40)
+                    // 하단 컨트롤 (갤러리 + 셔터)
+                    HStack(spacing: 40) {
+                        // 갤러리 버튼
+                        PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                            Image(systemName: "photo.on.rectangle")
+                                .font(.title)
+                                .foregroundStyle(.white)
+                                .frame(width: 50, height: 50)
+                                .background(Color.charcoalBlack.opacity(0.6))
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                )
+                        }
+                        
+                        // 셔터 버튼
+                        shutterButton
+                        
+                        // 균형을 위한 더미 (또는 추후 플래시 버튼 등)
+                        Color.clear
+                            .frame(width: 50, height: 50)
+                    }
+                    .padding(.bottom, 40)
                 }
             }
             .navigationTitle(currentStep.title)
@@ -58,6 +82,17 @@ struct CaptureView: View {
                 if let before = beforeImage, let after = afterImage {
                     RecordFormView(beforeImage: before, afterImage: after) {
                         dismissToRoot = false
+                    }
+                }
+            }
+            .onChange(of: selectedPhoto) { newItem in
+                Task {
+                    if let data = try? await newItem?.loadTransferable(type: Data.self),
+                       let image = UIImage(data: data) {
+                        await MainActor.run {
+                            handleImageCaptured(image)
+                            selectedPhoto = nil // 리셋
+                        }
                     }
                 }
             }
