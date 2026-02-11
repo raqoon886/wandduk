@@ -6,20 +6,22 @@ struct RecordCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // 썸네일
-            Group {
-                if let image = ImageStorageService.loadImage(at: record.beforeImagePath) {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 160)
-                        .clipped()
-                } else {
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(height: 160)
-                }
-            }
+            // 썸네일
+            Color.clear
+                .frame(height: 160)
+                .overlay(
+                    Group {
+                        if let image = ImageStorageService.loadImage(at: record.beforeImagePath) {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFill()
+                        } else {
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.2))
+                        }
+                    }
+                )
+                .clipped()
             
             // 정보 (종이 질감 하단)
             VStack(alignment: .leading, spacing: 6) {
