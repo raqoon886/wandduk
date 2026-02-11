@@ -387,10 +387,16 @@ struct RecordFormView: View {
         
         // Create Mode
         do {
-            guard let before = beforeImage, let after = afterImage else { return }
+            guard let before = beforeImage else { return }
             
             let beforePath = try ImageStorageService.saveImage(before)
-            let afterPath = try ImageStorageService.saveImage(after)
+            let afterPath: String
+            
+            if let after = afterImage {
+                afterPath = try ImageStorageService.saveImage(after)
+            } else {
+                afterPath = "" // 빈 문자열로 저장 (이미지 없음)
+            }
             
             let record = MealRecord(
                 category: selectedCategory,

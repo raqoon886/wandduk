@@ -8,6 +8,8 @@ struct RecordDetailView: View {
     let record: MealRecord
     @State private var showDeleteConfirmation = false
     @State private var showEditSheet = false
+    @State private var selectedImageForZoom: UIImage?
+    @State private var isZoomPresented = false
     
     var body: some View {
         ScrollView {
@@ -81,6 +83,26 @@ struct RecordDetailView: View {
                 RecordFormView(editingRecord: record)
             }
         }
+        .fullScreenCover(isPresented: $isZoomPresented) {
+            if let image = selectedImageForZoom {
+                ZStack(alignment: .topTrailing) {
+                    Color.black.ignoresSafeArea()
+                    
+                    ZoomableImageView(image: image)
+                        .ignoresSafeArea()
+                    
+                    Button {
+                        isZoomPresented = false
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.largeTitle)
+                            .foregroundStyle(.white)
+                            .padding()
+                            .padding(.top, 40)
+                    }
+                }
+            }
+        }
     }
     
     private func polaroid(imagePath: String) -> some View {
@@ -89,6 +111,11 @@ struct RecordDetailView: View {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFill()
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        selectedImageForZoom = image
+                        isZoomPresented = true
+                    }
             } else {
                 Rectangle().fill(Color.gray.opacity(0.2))
             }
@@ -132,5 +159,80 @@ struct RecordDetailView: View {
         ImageStorageService.deleteImage(at: record.afterImagePath)
         modelContext.delete(record)
         dismiss()
+    }
+}
+
+// MARK: - ZoomableImageView
+struct ZoomableImageView: UIViewRepresentable {
+    let image: UIImage
+    
+    func makeUIView(context: Context) -> UIScrollView {
+        let scrollView = UIScrollView()
+        scrollView.delegate = context.coordinator
+        scrollView.maximumZoomScale = 5.0
+        scrollView.minimumZoomScale = 1.0
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.showsHorizontalScrollIndicator = false
+        scrollView.backgroundColor = .black
+        
+        // 이미지 뷰 생성
+        let imageView = UIImageView(image: image)
+        imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        scrollView.addSubview(imageView)
+        context.coordinator.imageView = imageView
+        
+        // Auto Layout: 스크롤 뷰와 동일한 크기 (초기 상태)
+        NSLayoutConstraint.activate([
+            imageView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            imageView.heightAnchor.constraint(equalTo: scrollView.heightAnchor)
+        ])
+        
+        // 더블 탭 제스처
+        let doubleTapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleDoubleTap(_:)))
+        doubleTapGesture.numberOfTapsRequired = 2
+        scrollView.addGestureRecognizer(doubleTapGesture)
+        
+        return scrollView
+    }
+    
+    func updateUIView(_ uiView: UIScrollView, context: Context) {
+        if let imageView = context.coordinator.imageView, imageView.image != image {
+            imageView.image = image
+        }
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, UIScrollViewDelegate {
+        var parent: ZoomableImageView
+        var imageView: UIImageView?
+        
+        init(_ parent: ZoomableImageView) {
+            self.parent = parent
+        }
+        
+        func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+            return imageView
+        }
+        
+        @objc func handleDoubleTap(_ gesture: UITapGestureRecognizer) {
+            guard let scrollView = gesture.view as? UIScrollView else { return }
+            
+            if scrollView.zoomScale > 1.0 {
+                scrollView.setZoomScale(1.0, animated: true)
+            } else {
+                let point = gesture.location(in: imageView)
+                let scrollSize = scrollView.frame.size
+                let size = CGSize(width: scrollSize.width / scrollView.maximumZoomScale,
+                                  height: scrollSize.height / scrollView.maximumZoomScale)
+                let origin = CGPoint(x: point.x - size.width / 2,
+                                     y: point.y - size.height / 2)
+                scrollView.zoom(to: CGRect(origin: origin, size: size), animated: true)
+            }
+        }
     }
 }

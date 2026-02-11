@@ -79,8 +79,9 @@ struct CaptureView: View {
                 }
             }
             .navigationDestination(isPresented: $showRecordForm) {
-                if let before = beforeImage, let after = afterImage {
-                    RecordFormView(beforeImage: before, afterImage: after) {
+                if let before = beforeImage {
+                    // afterImage can be nil
+                    RecordFormView(beforeImage: before, afterImage: afterImage) {
                         dismissToRoot = false
                     }
                 }
@@ -208,6 +209,23 @@ struct CaptureView: View {
                         .clipShape(Circle())
                 }
                 .offset(x: 80)
+            } else if currentStep == .after {
+                // 건너뛰기 버튼 (이미지가 없을 때)
+                Button {
+                    proceedToNextStep()
+                } label: {
+                    Text("건너뛰기")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.charcoalBlack.opacity(0.6))
+                        .clipShape(Capsule())
+                        .overlay(
+                            Capsule().stroke(Color.white.opacity(0.3), lineWidth: 1)
+                        )
+                }
+                .offset(y: -80) // 셔터 버튼 위쪽
             }
         }
     }
