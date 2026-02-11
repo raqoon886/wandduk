@@ -11,11 +11,15 @@ final class MockPhotoCaptureService: PhotoCaptureProtocol {
         // 실제 카메라처럼 약간의 딜레이 추가
         try? await Task.sleep(nanoseconds: 300_000_000) // 0.3초
         
-        // 랜덤하게 샘플 이미지 선택
-        guard let imageName = sampleImageNames.randomElement() else {
-            return nil
+        switch type {
+        case .before:
+            // 랜덤하게 샘플 이미지 선택 (국밥, 라멘 등)
+            guard let imageName = sampleImageNames.randomElement() else { return nil }
+            return UIImage(named: imageName)
+            
+        case .after:
+            // 완뚝 인증: 빈 뚝배기 이미지 반환
+            return UIImage(named: "EmptyTtukbaegi")
         }
-        
-        return UIImage(named: imageName)
     }
 }
