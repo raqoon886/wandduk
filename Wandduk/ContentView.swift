@@ -83,24 +83,15 @@ struct ContentView: View {
                         .foregroundStyle(Color.charcoalBlack)
                 }
                 
-                // 뷰 모드 토글 + 카메라
+                // 뷰 모드 토글
                 ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: 20) {
-                        Button {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                viewMode = viewMode == .grid ? .calendar : .grid
-                            }
-                        } label: {
-                            Image(systemName: viewMode == .grid ? "calendar" : "square.grid.2x2")
-                                .foregroundStyle(Color.charcoalBlack)
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            viewMode = viewMode == .grid ? .calendar : .grid
                         }
-                        
-                        Button {
-                            showCapture = true
-                        } label: {
-                            Image(systemName: "camera.fill")
-                                .foregroundStyle(Color.charcoalBlack)
-                        }
+                    } label: {
+                        Image(systemName: viewMode == .grid ? "calendar" : "square.grid.2x2")
+                            .foregroundStyle(Color.charcoalBlack)
                     }
                 }
             }
