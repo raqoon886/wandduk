@@ -76,3 +76,67 @@ extension MealRecord {
         ImageStorageService.fullURL(for: afterImagePath)
     }
 }
+struct TasteProfile {
+    var averageSaltiness: Double
+    var averageRichness: Double
+    var averageSpiciness: Double
+    var averagePortion: Double
+    var totalRecords: Int
+    
+    static let empty = TasteProfile(
+        averageSaltiness: 0,
+        averageRichness: 0,
+        averageSpiciness: 0,
+        averagePortion: 0,
+        totalRecords: 0
+    )
+}
+
+struct StatisticsService {
+    static func calculateProfile(from records: [MealRecord]) -> TasteProfile {
+        guard !records.isEmpty else { return .empty }
+        
+        let count = Double(records.count)
+        
+        let totalSaltiness = records.reduce(0) { $0 + $1.saltiness }
+        let totalRichness = records.reduce(0) { $0 + $1.richness }
+        let totalSpiciness = records.reduce(0) { $0 + $1.spiciness }
+        let totalPortion = records.reduce(0) { $0 + $1.portion }
+        
+        return TasteProfile(
+            averageSaltiness: Double(totalSaltiness) / count,
+            averageRichness: Double(totalRichness) / count,
+            averageSpiciness: Double(totalSpiciness) / count,
+            averagePortion: Double(totalPortion) / count,
+            totalRecords: records.count
+        )
+    }
+    
+    static func generateDescription(for profile: TasteProfile) -> String {
+        if profile.totalRecords == 0 {
+            return "아직 기록된 국밥이 없습니다.\n첫 완뚝을 기록해보세요!"
+        }
+        
+        var descriptions: [String] = []
+        
+        if profile.averageSpiciness >= 5.0 {
+            descriptions.append("얼큰하고")
+        } else if profile.averageSpiciness <= 2.0 {
+            descriptions.append("담백하고")
+        }
+        
+        if profile.averageRichness >= 5.0 {
+            descriptions.append("진한 국물을 선호하는")
+        } else if profile.averageRichness <= 2.0 {
+            descriptions.append("깔끔한 국물을 즐기는")
+        } else {
+            descriptions.append("균형 잡힌 국물을 즐기는")
+        }
+        
+        if profile.averageSaltiness >= 5.5 {
+            descriptions.append("나트륨 매니아!")
+        }
+        
+        return "당신은 " + descriptions.joined(separator: " ") + " 국밥인입니다."
+    }
+}
