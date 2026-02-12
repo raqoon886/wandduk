@@ -209,7 +209,6 @@ struct CaptureView: View {
                         .clipShape(Circle())
                 }
                 .offset(x: 80)
-            } else if currentStep == .after {
                 // 건너뛰기 버튼 (이미지가 없을 때)
                 Button {
                     proceedToNextStep()
@@ -217,8 +216,9 @@ struct CaptureView: View {
                     Text("건너뛰기")
                         .font(.headline)
                         .foregroundStyle(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
+                        .fixedSize(horizontal: true, vertical: false) // 텍스트 줄바꿈 방지
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
                         .background(Color.charcoalBlack.opacity(0.6))
                         .clipShape(Capsule())
                         .overlay(
